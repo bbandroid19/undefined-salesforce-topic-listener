@@ -1,0 +1,27 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<types:mule xmlns:types="http://www.mulesoft.org/schema/mule/types">
+  <types:catalog>
+    <types:type name="case" format="json">
+      <types:shape format="weave" example="examples/Case-1.json"><![CDATA[%dw 2.0
+
+type case = {|
+  Status: String, 
+  Type: String, 
+  Priority: String, 
+  Id: String, 
+  Subject: String
+|} {"example": "{\\\"Status\\\":\\\"New\\\",\\\"Type\\\":\\\"Electrical\\\",\\\"Priority\\\":\\\"Medium\\\",\\\"Id\\\":\\\"5003j00001dHndMAAS\\\",\\\"Subject\\\":\\\"Test2\\\"}"}
+
+]]></types:shape>
+    </types:type>
+  </types:catalog>
+  <types:enrichment select="#be033672-7d1a-473a-96c1-e4a03094fccf">
+    <types:processor-declaration>
+      <types:input-event>
+        <types:message>
+          <types:payload type="case"/>
+        </types:message>
+      </types:input-event>
+    </types:processor-declaration>
+  </types:enrichment>
+</types:mule>

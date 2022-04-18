@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:munit="http://www.mulesoft.org/schema/mule/munit" xmlns:munit-tools="http://www.mulesoft.org/schema/mule/munit-tools"
+	xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation"
+	xsi:schemaLocation="
+		http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+		http://www.mulesoft.org/schema/mule/munit http://www.mulesoft.org/schema/mule/munit/current/mule-munit.xsd
+		http://www.mulesoft.org/schema/mule/munit-tools  http://www.mulesoft.org/schema/mule/munit-tools/current/mule-munit-tools.xsd">
+	<munit:config name="logic-test-suite.xml" />
+	<munit:test name="logic-test-suite-logic-sub-flowTest" doc:id="32ffc9db-b013-4ab4-974b-8a12eb5985ec" description="Test">
+		<munit:behavior >
+			<munit-tools:mock-when doc:name="Mock when" doc:id="caff00c9-bf06-4f43-a597-1bc1077bbd74" processor="anypoint-mq:publish">
+				<munit-tools:with-attributes >
+					<munit-tools:with-attribute whereValue="publish-to-case-amqueue" attributeName="doc:name" />
+					<munit-tools:with-attribute whereValue="Anypoint_MQ_Config" attributeName="config-ref" />
+				</munit-tools:with-attributes>
+				<munit-tools:then-return >
+					<munit-tools:payload value='#[%dw 2.0
+output application/json
+---
+{  Status:"New",
+   Type:"Electrical", 
+   Priority: "Medium",
+   Id: "5003j00001dHndMAAS", 
+   Subject:"Test2"
+}]' mediaType="application/json" />
+				</munit-tools:then-return>
+			</munit-tools:mock-when>
+		</munit:behavior>
+		<munit:execution >
+			<munit:set-event doc:name="Set Event" doc:id="f7a515e9-2d1b-4c39-bcf2-c9deda818e21" >
+				<munit:payload value="#[readUrl('classpath://transforms/examples/case-mock-payload.dwl')]" />
+			</munit:set-event>
+			<flow-ref doc:name="Flow-ref to logic-subflow" doc:id="d20acff7-a061-4743-83f9-6bbd464e779f" name="case_publish-to-amq"/>
+		</munit:execution>
+		<munit:validation >
+			<munit-tools:assert-that doc:name="Assert that" doc:id="2d8c6d69-04e6-4a74-b14a-a0cd359499c8" expression="#[payload.Id]" is="#[MunitTools::notNullValue()]" message="Test Failed"/>
+		</munit:validation>
+	</munit:test>
+
+
+</mule>

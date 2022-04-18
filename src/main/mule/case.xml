@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:anypoint-mq="http://www.mulesoft.org/schema/mule/anypoint-mq" xmlns:validation="http://www.mulesoft.org/schema/mule/validation"
+	xmlns:json-logger="http://www.mulesoft.org/schema/mule/json-logger"
+	xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd
+http://www.mulesoft.org/schema/mule/json-logger http://www.mulesoft.org/schema/mule/json-logger/current/mule-json-logger.xsd
+http://www.mulesoft.org/schema/mule/validation http://www.mulesoft.org/schema/mule/validation/current/mule-validation.xsd
+http://www.mulesoft.org/schema/mule/anypoint-mq http://www.mulesoft.org/schema/mule/anypoint-mq/current/mule-anypoint-mq.xsd">
+	<sub-flow name="case_publish-to-amq" doc:id="9f7d0d32-409a-49d7-987d-fd66618de328" >
+		<ee:transform doc:name="Convert To JSON" doc:id="6eb07007-d1a6-444a-846a-bbb34a02b291" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+payload]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<logger level="INFO" doc:name="Before Publish" doc:id="ef6a8cdb-75a1-4083-8c25-048a18f1d22c" message="${application-msgs.before-connector-call-message}"/>
+		<until-successful doc:name="until-successful-publish-to-case-amqueue" doc:id="8158a41d-9329-454c-8a42-91535e07488c" millisBetweenRetries="${retry.amq.delayMillisecs}" maxRetries="${retry.amq.numRetries}">
+			<anypoint-mq:publish doc:name="publish-to-case-amqueue" doc:id="cd4438be-1808-4ce6-a459-197974dd5c1a" config-ref="Anypoint_MQ_Config" destination="${anypoint-mq.case-queue-name}" outputMimeType="application/json" target="payloadVar">
+			<anypoint-mq:properties><![CDATA[#[output application/java
+---
+{
+	correlationId : correlationId
+}]]]></anypoint-mq:properties>
+		</anypoint-mq:publish>
+		</until-successful>
+		<logger level="INFO" doc:name="After Publish" doc:id="4e1450f4-6613-4301-b260-5ca17752a370" message="${application-msgs.after-connector-call-message}"/>
+	</sub-flow>
+</mule>

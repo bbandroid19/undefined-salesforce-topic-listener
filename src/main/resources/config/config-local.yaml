@@ -1,0 +1,42 @@
+#AMQ Configurations
+anypoint-mq:
+    # replace if mq url changed
+    server-url: "https://mq-eu-west-2.anypoint.mulesoft.com/api/v1"
+    case-queue-name: "accelerator-salesforce-case-queue"
+    case-dl-queue-name: "accelerator-salesforce-case-dl-queue"
+    client-id: "26a6eb20edf340349522fbfc52b63ce3"
+    client-secret: "a5fb567989f14091839c83782Ad96DF9"
+    
+#Salesforce Configurations    
+sfdc:
+    #replace with respective sfdc username
+    userName: "njclabs@sfdcservicecloud.com"
+    token: "gM2vI7a9hu9bfVrIwDCtX0QD"
+    password : "Salesforce@1234"
+    topicName: "servicecloud"
+    #Replace with higher values to prevent duplicate cases from SFDC
+    replayId: "1"
+   
+# Retry configuration
+retry:
+   amq: 
+    delayMillisecs: "3000"
+    numRetries: "3"
+    
+# Reconnect configuration
+reconnection:
+     amq:
+      frequency: "2000"
+      attempts: "2"
+     sfdc:
+      frequency: "3000"
+      attempts: "3"  
+      
+# Customize the application messages in the below section    
+application-msgs:
+   # Before Connector logger message
+   before-connector-call-message: "Before Connector Call"
+   # After Connector logger message
+   after-connector-call-message: "After Connector Call"
+   # Local Exception Handler logger message
+   local-exception-handler-message: "Exception has occured"

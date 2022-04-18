@@ -1,0 +1,111 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+
+	<parent>
+		<groupId>org.mule.examples</groupId>
+		<artifactId>accelerator-pom-parent</artifactId>
+		<version>1.0.0-SNAPSHOT</version>
+		<relativePath>../accelerator-pom-parent/pom.xml</relativePath>
+	</parent>
+
+    <groupId>org.mule.examples</groupId>
+	<artifactId>accel-salesforce-topic-listener</artifactId>
+	<version>1.0.0-SNAPSHOT</version>
+
+	<packaging>mule-application</packaging>
+	<name>accel-salesforce-topic-listener</name>
+	<description>Component of MuleSoft Accelerator for Salesforce Clouds</description>
+
+	<properties>
+		<api.name>Accelerator Salesforce Topic Listener</api.name>
+		<api.version>v1</api.version>
+		<accelerator-common-core.version>1.5.1</accelerator-common-core.version>
+		<anypoint.platform.visualizerLayer>Listener</anypoint.platform.visualizerLayer>
+	</properties>
+
+	<build>
+		<plugins>
+			<plugin>
+				<groupId>org.mule.tools.maven</groupId>
+				<artifactId>mule-maven-plugin</artifactId>
+				<extensions>true</extensions>
+				<configuration>
+					<cloudHubDeployment>
+						<properties>
+							<anypoint-mq.client-id>${accelerator-mq.client-id}</anypoint-mq.client-id>
+							<anypoint-mq.client-secret>${accelerator-mq.client-secret}</anypoint-mq.client-secret>
+							<sfdc.token>${sfdc.token}</sfdc.token>
+							<sfdc.password>${sfdc.password}</sfdc.password>
+						</properties>
+					</cloudHubDeployment>
+					<classifier>mule-application</classifier>
+                </configuration>
+			</plugin>
+			<plugin>
+				<groupId>com.mulesoft.munit.tools</groupId>
+				<artifactId>munit-maven-plugin</artifactId>
+				<configuration>
+					<coverage>
+						<ignoreFiles>
+							<ignoreFile>common-error-handler.xml</ignoreFile>
+							<ignoreFile>global-common.xml</ignoreFile>
+						</ignoreFiles>
+					</coverage>
+				</configuration>
+			</plugin>
+		</plugins>
+	</build>
+	<dependencies>
+		<dependency>
+			<groupId>com.mulesoft.connectors</groupId>
+			<artifactId>anypoint-mq-connector</artifactId>
+			<classifier>mule-plugin</classifier>
+		</dependency>
+		
+		<dependency>
+			<groupId>com.mulesoft.connectors</groupId>
+			<artifactId>mule-salesforce-connector</artifactId>
+			<classifier>mule-plugin</classifier>
+		</dependency>
+		<dependency>
+			<groupId>${project.parent.groupId}</groupId>
+			<artifactId>accelerator-common-core</artifactId>
+			<version>${accelerator-common-core.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.mule.connectors</groupId>
+			<artifactId>mule-sockets-connector</artifactId>
+			<classifier>mule-plugin</classifier>
+		</dependency>
+		<dependency>
+			<groupId>org.mule.connectors</groupId>
+			<artifactId>mule-http-connector</artifactId>
+			<classifier>mule-plugin</classifier>
+		</dependency>
+		<dependency>
+			<groupId>org.mule.modules</groupId>
+			<artifactId>mule-apikit-module</artifactId>
+			<classifier>mule-plugin</classifier>
+		</dependency>
+		<dependency>
+			<groupId>com.mulesoft.modules</groupId>
+			<artifactId>mule-secure-configuration-property-module</artifactId>
+			<classifier>mule-plugin</classifier>
+		</dependency>
+		<dependency>
+			<groupId>com.mulesoft.munit</groupId>
+			<artifactId>munit-runner</artifactId>
+			<classifier>mule-plugin</classifier>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>com.mulesoft.munit</groupId>
+			<artifactId>munit-tools</artifactId>
+			<classifier>mule-plugin</classifier>
+			<scope>test</scope>
+		</dependency>
+		
+    </dependencies>
+	
+</project>

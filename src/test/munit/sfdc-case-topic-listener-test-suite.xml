@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:munit="http://www.mulesoft.org/schema/mule/munit" xmlns:munit-tools="http://www.mulesoft.org/schema/mule/munit-tools"
+	xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation"
+	xsi:schemaLocation="
+		http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+		http://www.mulesoft.org/schema/mule/munit http://www.mulesoft.org/schema/mule/munit/current/mule-munit.xsd
+		http://www.mulesoft.org/schema/mule/munit-tools  http://www.mulesoft.org/schema/mule/munit-tools/current/mule-munit-tools.xsd">
+	<munit:config name="sfdc-case-topic-listener-test-suite.xml" />
+	<munit:test name="sfdc-case-topic-listener-test-suite-sfdc-case-topic-listener_mainTest" doc:id="ce3836bb-e5a2-4df2-bcc9-dd6116206ae9" description="Test">
+		<munit:behavior >
+			<munit-tools:mock-when doc:name="Mock when" doc:id="ccd08958-6d76-444c-b1da-a51a042dee19" processor="salesforce:replay-topic-listener">
+				<munit-tools:with-attributes >
+					<munit-tools:with-attribute whereValue="Salesforce_Config" attributeName="config-ref" />
+				</munit-tools:with-attributes>
+			</munit-tools:mock-when>
+		</munit:behavior>
+		<munit:execution >
+			<flow-ref doc:name="Flow-ref to sfdc-case-topic-listener_main" doc:id="792060c2-73e2-4d5b-8590-60231dc590e5" name="sfdc-case-topic-listener_main"/>
+		</munit:execution>
+		<munit:validation >
+			<munit-tools:assert-that doc:name="Assert that" doc:id="4fa3b916-7a5f-4437-9a85-6652fc49394a" expression="#[payload]" is="#[MunitTools::notNullValue()]"/>
+		</munit:validation>
+	</munit:test>
+	<munit:test name="sfdc-case-topic-listener-test-suite-sfdc-case-topic-listener_mainTest1" doc:id="89db45f2-cad0-4b79-89f4-8a855f2c3e16" description="Test">
+		<munit:behavior >
+			<munit-tools:mock-when doc:name="Mock when" doc:id="0c4602ea-abc3-4080-b212-15a4506236fb" processor="flow-ref">
+				<munit-tools:with-attributes >
+					<munit-tools:with-attribute whereValue="case_publish-to-amq" attributeName="doc:name" />
+				</munit-tools:with-attributes>
+				<munit-tools:then-return >
+					<munit-tools:payload value="#['{Status=New, Type=Electrical, Priority=Medium, Id=5003j00001dHndMAAS, Subject=Test2}']" mediaType="application/json" />
+					<munit-tools:error typeId="ANY" />
+					<munit-tools:variables >
+						<munit-tools:variable key="casePayload" value="#['1234']" />
+					</munit-tools:variables>
+				</munit-tools:then-return>
+			</munit-tools:mock-when>
+		</munit:behavior>
+		<munit:execution >
+			<munit:set-event doc:name="Set Event" doc:id="84286b91-8918-452d-bcff-11b64ef08507" >
+				<munit:payload value="&#10;" />
+				<munit:variables >
+					<munit:variable key="casePayload" value="#['234566']" />
+				</munit:variables>
+			</munit:set-event>
+			<try doc:name="Try" doc:id="ccb685bc-fb60-40fe-bd29-d1785f8105ca" >
+				<flow-ref doc:name="Flow-ref to sfdc-case-topic-listener_main" doc:id="d035cc7c-cb16-4821-a306-8fa6b5150448" name="sfdc-case-topic-listener_main" />
+				<error-handler >
+					<on-error-continue enableNotifications="true" logException="true" doc:name="On Error Continue" doc:id="c01d84ec-1058-4c77-b77b-c3249e74dbf9" >
+						<logger level="INFO" doc:name="Logger" doc:id="dbd49750-4d2f-4eba-b649-6d8b23cbf79d" message="#[payload]"/>
+					</on-error-continue>
+				</error-handler>
+			</try>
+		</munit:execution>
+		<munit:validation >
+			<munit-tools:assert doc:name="Assert expression" doc:id="ac4592d8-692b-4ace-b216-988dfe34ce6d" />
+		</munit:validation>
+	</munit:test>
+
+
+</mule>

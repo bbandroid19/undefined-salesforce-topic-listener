@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule
+	xmlns:anypoint-mq="http://www.mulesoft.org/schema/mule/anypoint-mq"
+	xmlns:salesforce="http://www.mulesoft.org/schema/mule/salesforce"
+	xmlns:json-logger="http://www.mulesoft.org/schema/mule/json-logger"
+	xmlns:secure-properties="http://www.mulesoft.org/schema/mule/secure-properties"
+	xmlns:wsc="http://www.mulesoft.org/schema/mule/wsc"
+	xmlns:api-gateway="http://www.mulesoft.org/schema/mule/api-gateway"
+	xmlns:apikit="http://www.mulesoft.org/schema/mule/mule-apikit"
+	xmlns:http="http://www.mulesoft.org/schema/mule/http"
+	xmlns="http://www.mulesoft.org/schema/mule/core"
+	xmlns:doc="http://www.mulesoft.org/schema/mule/documentation"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="
+http://www.mulesoft.org/schema/mule/mule-apikit http://www.mulesoft.org/schema/mule/mule-apikit/current/mule-apikit.xsd http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd
+http://www.mulesoft.org/schema/mule/api-gateway http://www.mulesoft.org/schema/mule/api-gateway/current/mule-api-gateway.xsd
+http://www.mulesoft.org/schema/mule/wsc http://www.mulesoft.org/schema/mule/wsc/current/mule-wsc.xsd
+http://www.mulesoft.org/schema/mule/secure-properties http://www.mulesoft.org/schema/mule/secure-properties/current/mule-secure-properties.xsd
+http://www.mulesoft.org/schema/mule/json-logger http://www.mulesoft.org/schema/mule/json-logger/current/mule-json-logger.xsd
+http://www.mulesoft.org/schema/mule/salesforce http://www.mulesoft.org/schema/mule/salesforce/current/mule-salesforce.xsd
+http://www.mulesoft.org/schema/mule/anypoint-mq http://www.mulesoft.org/schema/mule/anypoint-mq/current/mule-anypoint-mq.xsd">
+
+	<global-property doc:name="Global Property-mule.env"
+		doc:id="3547de1b-dd36-4404-9851-1e63388cc7a0" name="mule.env"
+		value="local" />
+	<global-property doc:name="Global Property-mule.key"
+		doc:id="cdd82a35-e3d0-4858-ab6f-16902d98f05d" name="mule.key"
+		value="Salesforce123456" />
+
+
+	<configuration-properties doc:name="mule-env"
+		doc:id="212d7d1c-4b28-4d32-9a07-37b74f7eb281"
+		file="config/config-${mule.env}.yaml" />
+	<secure-properties:config
+		name="Secure_Properties_Config" doc:name="secure-properties"
+		doc:id="f9b75545-2869-45db-8d54-a1be6c37a6fb"
+		file="config/config-secured-${mule.env}.yaml" key="${mule.key}" />
+
+	<configuration doc:name="global-error-handler"
+		doc:id="4c096bd6-6596-4fd1-a5b6-279956075864"
+		defaultErrorHandler-ref="error-handler_common" />
+	<anypoint-mq:config name="Anypoint_MQ_Config"
+		doc:name="anypoint-mq-case-config"
+		doc:id="c8f1227c-ca48-4fa8-aed9-81fbe7b50fad">
+		<anypoint-mq:connection
+			clientId="${anypoint-mq.client-id}"
+			clientSecret="${anypoint-mq.client-secret}"
+			url="${anypoint-mq.server-url}">
+			<reconnection>
+				<reconnect frequency="${reconnection.amq.frequency}"
+					count="${reconnection.amq.attempts}" />
+			</reconnection>
+		</anypoint-mq:connection>
+	</anypoint-mq:config>
+	<salesforce:sfdc-config name="Salesforce_Config"
+		doc:name="sfdc-basic-connection-config"
+		doc:id="f85b54d6-9708-419c-af38-baf44ee36099">
+		<salesforce:basic-connection
+			username="${sfdc.userName}" password="${sfdc.password}"
+			securityToken="${sfdc.token}">
+			<reconnection>
+				<reconnect frequency="${reconnection.sfdc.frequency}"
+					count="${reconnection.sfdc.attempts}" />
+			</reconnection>
+		</salesforce:basic-connection>
+	</salesforce:sfdc-config>
+	<import doc:name="common-configuration"
+		doc:id="cec37bf8-11d6-418b-b14c-5ce333a7c466" file="global-common.xml" />
+	<import doc:name="global-exception"
+		doc:id="8ce5ab06-2a4e-4761-b696-1dd1c639dfb7"
+		file="common-error-handler.xml" />
+
+
+
+</mule>

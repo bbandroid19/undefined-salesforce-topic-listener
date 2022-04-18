@@ -1,0 +1,102 @@
+trigger:
+  branches:
+    include:
+      - '*'
+pool:
+  vmImage: 'ubuntu-latest'
+
+variables:
+- name: MAVEN_CACHE_FOLDER
+  value: $(Pipeline.Workspace)/.m2/repository
+- name: MAVEN_OPTS
+  value: '-Dmaven.repo.local=$(MAVEN_CACHE_FOLDER)  -Dmule.env=dev -s $(muleSettingsFile.secureFilePath)'  
+- name: MAVEN_OPTS_BUILD
+  value: '-DskipTests '
+- name: MAVEN_OPTS_TEST_CUCUMBER
+  value: '-Dtestfile=src/test/javarunner.TestRunner.java  -Dmule.env=dev '
+- name: MAVEN_OPTS_TEST_MUNIT
+  value: '-Dsecure.key=mule -Dmule.env=dev '    
+
+steps:
+- task: DownloadSecureFile@1
+  name: muleSettingsFile
+  displayName: 'Download Mulesoft Settings'
+  inputs:
+    secureFile: 'settings.xml'
+- task: CacheBeta@0
+  inputs:
+    key: $(Build.SourcesDirectory)/pom.xml
+    path: $(MAVEN_CACHE_FOLDER)
+  displayName: Cache Maven local repo
+- task: Maven@3
+  inputs:
+    mavenPomFile: 'pom.xml'
+    publishJUnitResults: true
+    testResultsFiles: '**/surefire-reports/TEST-*.xml'
+    mavenOptions: '-Xmx3072m'
+    javaHomeOption: 'JDKVersion'
+    jdkVersionOption: '1.8'
+    jdkArchitectureOption: 'x64'
+    goals: 'package $(MAVEN_OPTS) $(MAVEN_OPTS_BUILD)'
+    sonarQubeRunAnalysis: false
+    isJacocoCoverageReportXML: true
+    sqMavenPluginVersionChoice: 'pom'
+  displayName: Maven Build
+- task: CopyFiles@2
+  inputs:
+    Contents: '**/target/*.jar'
+    TargetFolder: $(Build.ArtifactStagingDirectory)
+    CleanTargetFolder: true
+    flattenFolders: true    
+- task: Maven@3
+  inputs:
+    mavenPomFile: 'pom.xml'
+    publishJUnitResults: true
+    testResultsFiles: '**/surefire-reports/TEST-*.xml'
+    mavenOptions: '-Xmx3072m'
+    javaHomeOption: 'JDKVersion'
+    jdkVersionOption: '1.8'
+    jdkArchitectureOption: 'x64'
+    goals: 'test $(MAVEN_OPTS) $(MAVEN_OPTS_TEST_MUNIT)'
+    sqMavenPluginVersionChoice: 'pom'
+  continueOnError: true
+  displayName: Munit Test
+- task: PublishTestResults@2
+  inputs:
+    testResultsFiles: '**/TEST-*.xml' 
+    #searchFolder: '$(System.DefaultWorkingDirectory)' # Optional
+    mergeTestResults: true # Optional
+    #failTaskOnFailedTests: false # Optional
+    # testRunTitle: APIOPS-MUNIT
+    #buildPlatform: # Optional
+    #buildConfiguration: # Optional
+    publishRunAttachments: true # Optional 
+  continueOnError: true
+  displayName: Munit Publish Report
+# - task: Maven@3
+#   inputs:
+#     mavenPomFile: 'pom.xml'
+#     mavenOptions: '-Xmx3072m'
+#     javaHomeOption: 'JDKVersion'
+#     jdkVersionOption: '1.8'
+#     jdkArchitectureOption: 'x64'
+#     goals: 'test $(MAVEN_OPTS) $(MAVEN_OPTS_TEST_CUCUMBER)'
+#     sqMavenPluginVersionChoice: 'pom'
+#   continueOnError: true
+#   displayName: Functional Test 
+- task: PublishPipelineArtifact@1
+  inputs:
+    targetPath: $(System.DefaultWorkingDirectory)
+    artifact: 'drop'
+# - task: NodeTool@0
+#   displayName: 'Install Node 12.x'
+#   inputs:
+#     versionSpec: 12.x
+# - task: PublishCucumberReport@1
+#   inputs:
+#     jsonDir: 'results'
+#     outputPath: 'target/cucumber-reports'
+#     theme: 'bootstrap'
+#     reportSuiteAsScenarios: false
+#     name: cucumber
+#   continueOnError: true

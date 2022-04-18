@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<mule xmlns:os="http://www.mulesoft.org/schema/mule/os" xmlns:anypoint-mq="http://www.mulesoft.org/schema/mule/anypoint-mq" xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xmlns:salesforce="http://www.mulesoft.org/schema/mule/salesforce" xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:apikit="http://www.mulesoft.org/schema/mule/mule-apikit" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:http="http://www.mulesoft.org/schema/mule/http" xmlns:json-logger="http://www.mulesoft.org/schema/mule/json-logger" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd http://www.mulesoft.org/schema/mule/mule-apikit http://www.mulesoft.org/schema/mule/mule-apikit/current/mule-apikit.xsd  http://www.mulesoft.org/schema/mule/json-logger http://www.mulesoft.org/schema/mule/json-logger/current/mule-json-logger.xsd http://www.mulesoft.org/schema/mule/salesforce http://www.mulesoft.org/schema/mule/salesforce/current/mule-salesforce.xsd
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd
+http://www.mulesoft.org/schema/mule/anypoint-mq http://www.mulesoft.org/schema/mule/anypoint-mq/current/mule-anypoint-mq.xsd
+http://www.mulesoft.org/schema/mule/os http://www.mulesoft.org/schema/mule/os/current/mule-os.xsd">
+	<flow name="sfdc-case-topic-listener_main">
+		
+		<salesforce:replay-topic-listener doc:name="replay-sfdc-case-topic-listener" doc:id="c6d92842-3c4f-4555-a6c1-ce898ce50e3d" config-ref="Salesforce_Config" replayId="${sfdc.replayId}" replayOption="ONLY_NEW" topic="sfdcservicecloud"/>
+		<try doc:name="try-scope" doc:id="b3d1b207-d07c-4617-81ce-800a21b8d2eb" >
+			<set-variable value="#[%dw 2.0
+output application/json
+---	
+payload]" doc:name="set-payload-var" doc:id="ac6d87b0-46a6-438b-87d2-efd9f046db1a" variableName="casePayload" mimeType="application/json" />
+			<logger level="INFO" doc:name="Logger" doc:id="322b7b2d-794d-43aa-b7cf-3e0ed244f864" />
+			<flow-ref doc:name="case_publish-to-amq" doc:id="e02344ec-e01b-4a0e-a8b1-95005d845589" name="case_publish-to-amq" />
+			<error-handler >
+				<on-error-propagate enableNotifications="true" logException="true" doc:name="on-error-propagate-for-any" doc:id="80c300f4-63d0-467e-9e5f-3d2db92f8940" type="ANY">
+				<logger level="ERROR" doc:name="Error Publish To MQ" doc:id="95a69d9e-5626-4422-bb8d-0d50c53d603c" message="${application-msgs.local-exception-handler-message}"/>
+					<anypoint-mq:publish doc:name="publish-to-case-dlqueue" doc:id="a3a30b79-21f7-4295-b2d2-9c7513053187" config-ref="Anypoint_MQ_Config" destination="${anypoint-mq.case-dl-queue-name}" outputMimeType="application/json">
+					<anypoint-mq:body><![CDATA[#[vars.casePayload]]]></anypoint-mq:body>
+					<anypoint-mq:properties><![CDATA[#[output application/java
+---
+{
+	correlationId : attributes.correlationId
+}]]]></anypoint-mq:properties>
+				</anypoint-mq:publish>
+				<raise-error doc:name="raise-error-for-any" doc:id="49e74b82-4ebf-463f-b09f-faf464ead99c" type="ANY" description="${application-msgs.local-exception-handler-message}"/>
+			
+</on-error-propagate>
+			</error-handler>
+		</try>
+    </flow>
+
+</mule>
